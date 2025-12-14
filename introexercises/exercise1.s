@@ -5,7 +5,7 @@
 
 Main:
     li $t0, 0x01
-    li $t1, 0xF0
-    li $t2, 0xF1
+    li $t1, 0x100
+    li $t2, 0x11
 End:
 .close
