@@ -4,11 +4,11 @@
 .org 0x80010000
 
 Main:
-    li $t0, 0x5 // num
-    li $t1, 0x1 // i
-    li $t2, 0x1 // j
-    li $t3, 0x1 // temp
-    li $t4, 0x1 // sum
+    li $t0, 0x5 ; num
+    li $t1, 0x1 ; i
+    li $t2, 0x1 ; j
+    li $t3, 0x1 ; temp
+    li $t4, 0x1 ; sum
     addiu $t5, $t0, 0x1
 
 OuterLoop:

@@ -10,7 +10,7 @@ Main:
 Loop:
     subu $t0, $t0, $t1
     addi $t2, 0x01
-    bge $t0, t1, Loop
+    bge $t0, $t1, Loop
 End:
 
 .close
