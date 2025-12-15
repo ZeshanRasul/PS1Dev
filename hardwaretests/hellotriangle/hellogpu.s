@@ -24,7 +24,7 @@ Main:
     sw $t1, GP1($t0)
 
     ; Display Mode
-    li $t1, 0x08001001
+    li $t1, 0x08000001
     sw $t1, GP1($t0)
 
     ; Set Horizonal Range
