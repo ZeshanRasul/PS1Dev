@@ -1,0 +1,12 @@
+<iso_project image_name="HELLOGPU.bin" cue_sheet="HELLOGPU.cue" no_xa="0">
+        <track type="data" xa_edc="true" new_type="false">
+	<directory_tree>
+			
+            <file name="system.cnf"	type="data"	source="system.cnf"/>
+            
+            <file name="HELLOGPU.exe" type="data" src="HELLOGPU.EXE"/>
+
+    </directory_tree>
+        </track>
+
+</iso_project>
