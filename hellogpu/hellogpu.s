@@ -54,11 +54,21 @@ Main:
     sw $t1, GP0($t0)
 
     ;;; Clear Screen
-    li $t1, 0x02FF00FF
+    li $t1, 0x0280045A
     sw $t1, GP0($t0)
     li $t1, 0x00000000
     sw $t1, GP0($t0)
     li $t1, 0x00F00140
+    sw $t1, GP0($t0)
+
+    ;;; Draw Flat Shaded Triangle
+    li $t1, 0x2014F7FF
+    sw $t1, GP0($t0)
+    li $t1, 0x005000A0
+    sw $t1, GP0($t0)
+    li $t1, 0x00A000F0
+    sw $t1, GP0($t0)
+    li $t1, 0x00A00050
     sw $t1, GP0($t0)
 
 LoopForever:
