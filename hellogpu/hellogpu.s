@@ -24,7 +24,11 @@ Main:
     sw $t1, GP1($t0)
 
     ; Display Mode
-    li $t1, 0x08001001
+    li $t1, 0x08000009
+    sw $t1, GP1($t0)
+
+    ; Display Area Start (X=0, Y=0)
+    li $t1, 0x05000000
     sw $t1, GP1($t0)
 
     ; Set Horizonal Range
@@ -32,7 +36,7 @@ Main:
     sw $t1, GP1($t0)
 
     ; Set Vertical Range
-    li $t1, 0x07042018
+    li $t1, 0x07042818
     sw $t1, GP1($t0)
 
     ;;; Setup VRAM Access
