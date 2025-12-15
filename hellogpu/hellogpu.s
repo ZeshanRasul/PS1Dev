@@ -53,6 +53,17 @@ Main:
     li $t1, 0xE5000000
     sw $t1, GP0($t0)
 
+    ;;; Clear Screen
+    li $t1, 0x02FF00FF
+    sw $t1, GP0($t0)
+    li $t1, 0x00000000
+    sw $t1, GP0($t0)
+    li $t1, 0x00F00140
+    sw $t1, GP0($t0)
+
+LoopForever:
+    j Main
+
 End:
 
 .close
