@@ -13,6 +13,8 @@ GP1 equ 0x1814
 Main:
     lui $t0, IO_BASE_ADDR 
 
+    la $sp, 0x00103CF0
+
     ;;; Display Setup
     
     ; Reset GPU
@@ -77,58 +79,83 @@ Main:
     li $t1, 0x00F000F0
     sw $t1, GP0($t0)
 
-    ;;; Draw Flat Shaded Triangle
+    ;;; Draw Flat Shaded Triangle (params stored in stack)
+
     lui $a0, IO_BASE_ADDR
-    li $s0, 0xFFFF00
-    li $s1, 200
-    li $s2, 40
-    li $s3, 288
-    li $s4, 56
-    li $s5, 224
-    li $s6, 200
+
+    addiu $sp, -(4 * 7)
+
+    li $t0, 0xFF4472
+    sw $t0, 0($sp)
+
+    li $t0, 200
+    sw $t0, 4($sp)
+
+    li $t0, 40
+    sw $t0, 8($sp)
+
+    li $t0, 288
+    sw $t0, 12($sp)
+
+    li $t0, 56
+    sw $t0, 16($sp)
+
+    li $t0, 224
+    sw $t0, 20($sp)
+
+    li $t0, 200
+    sw $t0, 24($sp)
+
     jal DrawFlatShadedTriangle
     nop
-
 
 LoopForever:
     j LoopForever
     nop
 
-;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subroutine to draw flat shaded triangle
-;; Args:
-;; $a0 = IO_BASE_ADDR
-;; $s0 = Color
-;; $s1 = x1
-;; $s2 = y1
-;; $s3 = x2
-;; $s4 = y2
-;; $s5 = x3
-;; $s6 = y3
-;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
 DrawFlatShadedTriangle:
+
     lui $t0, 0x2000
-    or $t1, $t0, $s0
-    sw $t1, GP0($a0)
+    lw $t1, 0($sp)
+    nop
+    
+    or $t8, $t0, $t1
+    sw $t8, GP0($a0)
 
-    sll $s2, $s2, 16
-    andi $s1, $s1, 0xFFFF
-    or $t1, $s1, $s2
-    sw $t1, GP0($a0)
+    lw $t1, 4($sp)
+    lw $t2, 8($sp)
+    nop
 
-    sll $s4, $s4, 16
-    andi $s3, $s3, 0xFFFF
-    or $t1, $s3, $s4
-    sw $t1, GP0($a0)
+    sll $t2, $t2, 16
+    andi $t1, $t1, 0xFFFF
+    or $t8, $t1, $t2
+    sw $t8, GP0($a0)
 
-    sll $s6, $s6, 16
-    andi $s5, $s5, 0xFFFF
-    or $t1, $s5, $s6
-    sw $t1, GP0($a0)
+    lw $t1, 12($sp)
+    lw $t2, 16($sp)
+    nop
+
+    sll $t2, $t2, 16
+    andi $t1, $t1, 0xFFFF
+    or $t8, $t1, $t2
+    sw $t8, GP0($a0)
+
+    lw $t1, 20($sp)
+    lw $t2, 24($sp)
+    nop
+
+    sll $t2, $t2, 16
+    andi $t1, $t1, 0xFFFF
+    or $t8, $t1, $t2
+    sw $t8, GP0($a0)
+
+    addiu $sp, $sp, (4 * 7)
 
     jr $ra
     nop
-
-End:
 
 .close
