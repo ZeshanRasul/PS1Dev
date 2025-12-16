@@ -75,6 +75,18 @@ Main:
     li $t1, 0x00A00050
     sw $t1, GP0($t0)
 
+    ;;; Draw Flay Shaded Quad
+    li $t1, 0x2803DE33
+    sw $t1, GP0($t0)
+    li $t1, 0x00A00050
+    sw $t1, GP0($t0)
+    li $t1, 0x00A000F0
+    sw $t1, GP0($t0)
+    li $t1, 0x00F00050
+    sw $t1, GP0($t0)
+    li $t1, 0x00F000F0
+    sw $t1, GP0($t0)
+
 LoopForever:
     j LoopForever
     nop
