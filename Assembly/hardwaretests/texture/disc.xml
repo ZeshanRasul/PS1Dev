@@ -1,0 +1,8 @@
+<iso_project image_name="TEXTURE.bin" cue_sheet="TEXTURE.cue" no_xa="0">
+  <track type="data" xa_edc="true" new_type="false">
+    <directory_tree>
+      <file name="SYSTEM.CNF" type="data" source="SYSTEM.CNF"/>
+      <file name="TEXTURE.EXE" type="data" source="TEXTURE.EXE"/>
+    </directory_tree>
+  </track>
+</iso_project>
