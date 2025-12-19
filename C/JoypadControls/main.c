@@ -1,0 +1,297 @@
+#include <stdlib.h>
+#include <LIBGTE.H>
+#include <LIBETC.H>
+#include <LIBGPU.H>
+
+#define VIDEO_MODE 1
+#define SCREEN_RES_X 320
+#define SCREEN_RES_Y 240
+#define SCREEN_CENTER_X (SCREEN_RES_X >> 1)
+#define SCREEN_CENTER_Y (SCREEN_RES_Y >> 1)
+#define SCREEN_Z 400
+#define OT_LENGTH 4096
+
+#define NUM_VERTICES 8
+#define NUM_FACES 6
+
+typedef struct Cube {
+    SVECTOR rotation;
+    VECTOR position;
+    VECTOR scale;
+    VECTOR vel;
+    VECTOR acc;
+    SVECTOR vertices[8];
+    short faces[24];
+    MATRIX world;
+} Cube;
+
+typedef struct Floor {
+    SVECTOR rotation;
+    VECTOR position;
+    VECTOR scale;
+    SVECTOR vertices[4];
+    short faces[6];
+    MATRIX world;
+} Floor;
+
+SVECTOR vertices[] = {
+    { -128, -128, -128 },
+    { 128, -128, -128},
+    { 128, -128, 128},
+    { -128, -128, 128},
+    { -128, 128, -128},
+    { 128, 128, -128},
+    { 128, 128, 128},
+    { -128, 128, 128}
+};
+
+short faces[] = {
+    3, 2,
+    0, 1,
+    0, 1,
+    4, 5,
+    4, 5,
+    7, 6,
+    1, 2,
+    5, 6,
+    2, 3,
+    6, 7,
+    3, 0,
+    7, 4
+};
+
+SVECTOR triVertices[] = {
+    0, 300, -128,
+    400, 300, -128,
+    0, 100, 120
+};
+
+typedef struct {
+    DRAWENV draw[2];
+    DISPENV disp[2];
+} DoubleBuffer;
+
+DoubleBuffer screen;
+u_short currentBuffer;
+
+u_long padState;
+
+u_long ot[2][OT_LENGTH];
+
+char primBuffer[2][2048];
+char *nextPrim;
+
+POLY_G4 *poly;
+POLY_F3 *tri;
+
+Cube cube = {
+    {0, 0, 0},
+    {0, -400, 1800},
+    {ONE, ONE, ONE},
+    {0, 0, 0},
+    {0, 1, 0},
+    {
+        { -128, -128, -128 },
+        { 128, -128, -128},
+        { 128, -128, 128},
+        { -128, -128, 128},
+        { -128, 128, -128},
+        { 128, 128, -128},
+        { 128, 128, 128},
+        { -128, 128, 128}
+    },
+    {
+        3, 2,
+        0, 1,
+        0, 1,
+        4, 5,
+        4, 5,
+        7, 6,
+        1, 2,
+        5, 6,
+        2, 3,
+        6, 7,
+        3, 0,
+        7, 4
+    },
+    {0}
+};
+
+Floor floor = {
+    {0, 0, 0},
+    {0, 450, 1800},
+    {ONE, ONE, ONE},
+    {
+        {-900, 0, -900},
+        {-900, 0, 900},
+        {900, 0, -900},
+        {900, 0, 900}
+    },
+    {
+        0, 1, 2,
+        1, 3, 2
+    },
+    {0}
+};
+
+void ScreenInit(void)
+{
+    ResetGraph(0);
+
+    SetDefDispEnv(&screen.disp[0], 0, 0, SCREEN_RES_X, SCREEN_RES_Y);
+    SetDefDrawEnv(&screen.draw[0], 0, 240, SCREEN_RES_X, SCREEN_RES_Y);
+
+    SetDefDispEnv(&screen.disp[1], 0, 240, SCREEN_RES_X, SCREEN_RES_Y);
+    SetDefDrawEnv(&screen.draw[1], 0, 0, SCREEN_RES_X, SCREEN_RES_Y);
+
+    screen.draw[0].isbg = 1;
+    screen.draw[1].isbg = 1;
+
+    setRGB0(&screen.draw[0], 63, 0, 127);
+    setRGB0(&screen.draw[1], 63, 0, 127);
+
+    currentBuffer = 0;
+    PutDispEnv(&screen.disp[currentBuffer]);
+    PutDrawEnv(&screen.draw[currentBuffer]);
+
+    InitGeom();
+    SetGeomOffset(SCREEN_CENTER_X, SCREEN_CENTER_Y);
+    SetGeomScreen(SCREEN_Z);
+
+    SetDispMask(1);
+}
+
+void DisplayFrame(Void)
+{
+    DrawSync(0);
+    VSync(0);
+
+    PutDispEnv(&screen.disp[currentBuffer]);
+    PutDrawEnv(&screen.draw[currentBuffer]);
+
+    DrawOTag(ot[currentBuffer] + OT_LENGTH - 1);
+
+    currentBuffer = !currentBuffer;
+
+    nextPrim = primBuffer[currentBuffer];
+}
+
+void Setup(void)
+{
+    ScreenInit();
+
+    PadInit(0);
+
+    nextPrim = primBuffer[currentBuffer];
+}
+
+void Update(void)
+{
+    int i = 0;
+    int j = 0;
+    int nclip;
+    long otz = 0;
+    long p;
+    long flg;
+
+    ClearOTagR(ot[currentBuffer], OT_LENGTH);
+
+    padState = PadRead(0);
+
+    if (padState & _PAD(0, PADLleft))
+    {
+        cube.rotation.vy += 20;
+    }
+
+    if (padState & _PAD(0, PADLright))
+    {
+        cube.rotation.vy -= 20;
+    }
+
+    RotMatrix(&floor.rotation, &floor.world);
+    TransMatrix(&floor.world, &floor.position);
+    ScaleMatrix(&floor.world, &floor.scale);
+
+    SetRotMatrix(&floor.world);
+    SetTransMatrix(&floor.world);
+
+    for (j = 0; j < 2 * 3; j += 3)
+    {
+        tri = (POLY_F3*) nextPrim;
+        setPolyF3(tri);
+        setRGB0(tri, 255, 0, 0);
+
+        nclip = RotAverageNclip3(&floor.vertices[floor.faces[j]], &floor.vertices[floor.faces[j + 1]], &floor.vertices[floor.faces[j + 2]], (long*) &tri->x0, (long*) &tri->x1, (long*) &tri->x2, &p, &otz, &flg);
+
+        if (nclip < 0)
+        {
+            continue;
+        }
+
+        if ((otz > 0) && (otz < OT_LENGTH))
+        {
+            addPrim(ot[currentBuffer][otz], tri);
+            nextPrim += sizeof(POLY_F3);
+        }
+    }
+
+    cube.vel.vx += cube.acc.vx;
+    cube.vel.vy += cube.acc.vy;
+    cube.vel.vz += cube.acc.vz;
+
+    cube.position.vx += cube.vel.vx;
+    cube.position.vy += cube.vel.vy;
+    cube.position.vz += cube.vel.vz;
+
+    if (cube.position.vy + 150 > floor.position.vy)
+    {
+         cube.vel.vy *= -1;
+    }
+
+    RotMatrix(&cube.rotation, &cube.world);
+    TransMatrix(&cube.world, &cube.position);
+    ScaleMatrix(&cube.world, &cube.scale);
+
+    SetRotMatrix(&cube.world);
+    SetTransMatrix(&cube.world);
+
+    for (i = 0; i < 6 * 4; i += 4)
+    {
+        poly = (POLY_G4*) nextPrim;
+        setPolyG4(poly);
+        setRGB0(poly, 255, 0, 255);
+        setRGB1(poly, 255, 255, 0);
+        setRGB2(poly, 0, 255, 255);
+        setRGB3(poly, 0, 255, 0);
+
+        nclip = RotAverageNclip4(&cube.vertices[cube.faces[i + 0]], &cube.vertices[cube.faces[i + 1]], &cube.vertices[cube.faces[i + 2]], &cube.vertices[cube.faces[i+3]], (long*) &poly->x0, (long*) &poly->x1, (long*) &poly->x2, (long*) &poly->x3, &p, &otz, &flg);
+        if (nclip < 0)
+        {
+            continue;
+        }
+
+        if ((otz > 0) && (otz < OT_LENGTH))
+        {
+            addPrim(ot[currentBuffer][otz], poly);
+            nextPrim += sizeof(POLY_G4);
+        }
+    }
+}
+
+void Render(void)
+{
+    DisplayFrame();
+}
+
+int main(void)
+{
+    Setup();
+
+    while (1)
+    {
+        Update();
+        Render();
+    }
+
+    return 0;
+}
