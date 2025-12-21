@@ -31,7 +31,19 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="display.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="display.h" />
+		<Unit filename="globals.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="globals.h" />
 		<Unit filename="inline_n.h" />
+		<Unit filename="joypad.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="joypad.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>

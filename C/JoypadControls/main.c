@@ -2,14 +2,11 @@
 #include <LIBGTE.H>
 #include <LIBETC.H>
 #include <LIBGPU.H>
+#include "globals.h"
+#include "joypad.h"
+#include "display.h"
 
-#define VIDEO_MODE 1
-#define SCREEN_RES_X 320
-#define SCREEN_RES_Y 240
-#define SCREEN_CENTER_X (SCREEN_RES_X >> 1)
-#define SCREEN_CENTER_Y (SCREEN_RES_Y >> 1)
-#define SCREEN_Z 400
-#define OT_LENGTH 4096
+
 
 #define NUM_VERTICES 8
 #define NUM_FACES 6
@@ -66,21 +63,6 @@ SVECTOR triVertices[] = {
     0, 100, 120
 };
 
-typedef struct {
-    DRAWENV draw[2];
-    DISPENV disp[2];
-} DoubleBuffer;
-
-DoubleBuffer screen;
-u_short currentBuffer;
-
-u_long padState;
-
-u_long ot[2][OT_LENGTH];
-
-char primBuffer[2][2048];
-char *nextPrim;
-
 POLY_G4 *poly;
 POLY_F3 *tri;
 
@@ -134,55 +116,13 @@ Floor floor = {
     {0}
 };
 
-void ScreenInit(void)
-{
-    ResetGraph(0);
-
-    SetDefDispEnv(&screen.disp[0], 0, 0, SCREEN_RES_X, SCREEN_RES_Y);
-    SetDefDrawEnv(&screen.draw[0], 0, 240, SCREEN_RES_X, SCREEN_RES_Y);
-
-    SetDefDispEnv(&screen.disp[1], 0, 240, SCREEN_RES_X, SCREEN_RES_Y);
-    SetDefDrawEnv(&screen.draw[1], 0, 0, SCREEN_RES_X, SCREEN_RES_Y);
-
-    screen.draw[0].isbg = 1;
-    screen.draw[1].isbg = 1;
-
-    setRGB0(&screen.draw[0], 63, 0, 127);
-    setRGB0(&screen.draw[1], 63, 0, 127);
-
-    currentBuffer = 0;
-    PutDispEnv(&screen.disp[currentBuffer]);
-    PutDrawEnv(&screen.draw[currentBuffer]);
-
-    InitGeom();
-    SetGeomOffset(SCREEN_CENTER_X, SCREEN_CENTER_Y);
-    SetGeomScreen(SCREEN_Z);
-
-    SetDispMask(1);
-}
-
-void DisplayFrame(Void)
-{
-    DrawSync(0);
-    VSync(0);
-
-    PutDispEnv(&screen.disp[currentBuffer]);
-    PutDrawEnv(&screen.draw[currentBuffer]);
-
-    DrawOTag(ot[currentBuffer] + OT_LENGTH - 1);
-
-    currentBuffer = !currentBuffer;
-
-    nextPrim = primBuffer[currentBuffer];
-}
-
 void Setup(void)
 {
     ScreenInit();
 
-    PadInit(0);
+    JoyPadInit();
 
-    nextPrim = primBuffer[currentBuffer];
+    ResetNextPrim(GetCurrentBuffer());
 }
 
 void Update(void)
@@ -194,16 +134,16 @@ void Update(void)
     long p;
     long flg;
 
-    ClearOTagR(ot[currentBuffer], OT_LENGTH);
+    EmptyOT(GetCurrentBuffer());
 
-    padState = PadRead(0);
+    JoyPadUpdate();
 
-    if (padState & _PAD(0, PADLleft))
+    if (JoyPadCheck(_PAD(0, PADLleft)))
     {
         cube.rotation.vy += 20;
     }
 
-    if (padState & _PAD(0, PADLright))
+    if (JoyPadCheck(_PAD(0, PADLright)))
     {
         cube.rotation.vy -= 20;
     }
@@ -217,7 +157,7 @@ void Update(void)
 
     for (j = 0; j < 2 * 3; j += 3)
     {
-        tri = (POLY_F3*) nextPrim;
+        tri = (POLY_F3*) GetNextPrim();
         setPolyF3(tri);
         setRGB0(tri, 255, 0, 0);
 
@@ -230,8 +170,8 @@ void Update(void)
 
         if ((otz > 0) && (otz < OT_LENGTH))
         {
-            addPrim(ot[currentBuffer][otz], tri);
-            nextPrim += sizeof(POLY_F3);
+            addPrim(GetOTAt(GetCurrentBuffer(), otz), tri);
+            IncrementNextPrim(sizeof(POLY_F3));
         }
     }
 
@@ -257,7 +197,7 @@ void Update(void)
 
     for (i = 0; i < 6 * 4; i += 4)
     {
-        poly = (POLY_G4*) nextPrim;
+        poly = (POLY_G4*) GetNextPrim();
         setPolyG4(poly);
         setRGB0(poly, 255, 0, 255);
         setRGB1(poly, 255, 255, 0);
@@ -272,8 +212,8 @@ void Update(void)
 
         if ((otz > 0) && (otz < OT_LENGTH))
         {
-            addPrim(ot[currentBuffer][otz], poly);
-            nextPrim += sizeof(POLY_G4);
+            addPrim(GetOTAt(GetCurrentBuffer(), otz), poly);
+            IncrementNextPrim(sizeof(POLY_G4));
         }
     }
 }

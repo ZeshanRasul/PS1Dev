@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="main.c" open="1" top="1" tabpos="1">
-		<Cursor position="3411" topLine="194" />
+	<File name="display.c" open="1" top="0" tabpos="7">
+		<Cursor position="198" topLine="7" />
+	</File>
+	<File name="display.h" open="1" top="0" tabpos="8">
+		<Cursor position="436" topLine="0" />
+	</File>
+	<File name="globals.c" open="1" top="0" tabpos="4">
+		<Cursor position="287" topLine="0" />
+	</File>
+	<File name="globals.h" open="1" top="0" tabpos="3">
+		<Cursor position="194" topLine="0" />
+	</File>
+	<File name="joypad.h" open="1" top="0" tabpos="1">
+		<Cursor position="1192" topLine="0" />
+	</File>
+	<File name="main.c" open="1" top="1" tabpos="2">
+		<Cursor position="3813" topLine="122" />
+	</File>
+	<File name="makefile.mak" open="1" top="0" tabpos="5">
+		<Cursor position="127" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>
