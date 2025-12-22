@@ -1,0 +1,8 @@
+<iso_project image_name="CAMERA.bin" cue_sheet="CAMERA.cue" no_xa="0">
+  <track type="data" xa_edc="true" new_type="false">
+    <directory_tree>
+      <file name="SYSTEM.CNF" type="data" source="SYSTEM.CNF"/>
+      <file name="MAIN.EXE" type="data" source="MAIN.EXE"/>
+    </directory_tree>
+  </track>
+</iso_project>
