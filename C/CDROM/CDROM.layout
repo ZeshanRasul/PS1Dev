@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="BUILDISO.BAT" open="1" top="0" tabpos="2">
+		<Cursor position="308" topLine="0" />
+	</File>
+	<File name="CDLAYOUT.CTI" open="1" top="0" tabpos="3">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="CDLAYOUT.xml" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="12" />
+	</File>
+	<File name="SYSTEM.TXT" open="1" top="0" tabpos="1">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="main.c" open="1" top="1" tabpos="6">
+		<Cursor position="2048" topLine="117" />
+	</File>
+	<File name="utils.c" open="1" top="0" tabpos="5">
+		<Cursor position="283" topLine="0" />
+	</File>
+	<File name="utils.h" open="1" top="0" tabpos="4">
+		<Cursor position="58" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>

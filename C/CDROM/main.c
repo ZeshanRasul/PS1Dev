@@ -1,0 +1,279 @@
+#include <stdlib.h>
+#include <LIBETC.H>
+#include "joypad.h"
+#include "display.h"
+#include "camera.h"
+#include "globals.h"
+#include "utils.h"
+
+#define NUM_VERTICES 8
+#define NUM_FACES 6
+
+typedef struct Cube {
+    SVECTOR rotation;
+    VECTOR position;
+    VECTOR scale;
+    VECTOR vel;
+    VECTOR acc;
+    SVECTOR vertices[8];
+    short faces[24];
+    MATRIX world;
+} Cube;
+
+typedef struct Floor {
+    SVECTOR rotation;
+    VECTOR position;
+    VECTOR scale;
+    SVECTOR vertices[4];
+    short faces[6];
+    MATRIX world;
+} Floor;
+
+SVECTOR vertices[] = {
+    { -128, -128, -128 },
+    { 128, -128, -128},
+    { 128, -128, 128},
+    { -128, -128, 128},
+    { -128, 128, -128},
+    { 128, 128, -128},
+    { 128, 128, 128},
+    { -128, 128, 128}
+};
+
+short faces[] = {
+    3, 2,
+    0, 1,
+    0, 1,
+    4, 5,
+    4, 5,
+    7, 6,
+    1, 2,
+    5, 6,
+    2, 3,
+    6, 7,
+    3, 0,
+    7, 4
+};
+
+SVECTOR triVertices[] = {
+    0, 300, -128,
+    400, 300, -128,
+    0, 100, 120
+};
+
+POLY_G4 *poly;
+POLY_F3 *tri;
+
+Cube cube = {
+    {0, 0, 0},
+    {0, -400, 1800},
+    {ONE, ONE, ONE},
+    {0, 0, 0},
+    {0, 1, 0},
+    {
+        { -128, -128, -128 },
+        { 128, -128, -128},
+        { 128, -128, 128},
+        { -128, -128, 128},
+        { -128, 128, -128},
+        { 128, 128, -128},
+        { 128, 128, 128},
+        { -128, 128, 128}
+    },
+    {
+        3, 2,
+        0, 1,
+        0, 1,
+        4, 5,
+        4, 5,
+        7, 6,
+        1, 2,
+        5, 6,
+        2, 3,
+        6, 7,
+        3, 0,
+        7, 4
+    },
+    {0}
+};
+
+Floor floor = {
+    {0, 0, 0},
+    {0, 450, 1800},
+    {ONE, ONE, ONE},
+    {
+        {-900, 0, -900},
+        {-900, 0, 900},
+        {900, 0, -900},
+        {900, 0, 900}
+    },
+    {
+        0, 1, 2,
+        1, 3, 2
+    },
+    {0}
+};
+
+Camera camera;
+MATRIX view;
+
+int i = 0;
+int j = 0;
+int nclip;
+long otz = 0;
+long p;
+long flg;
+
+void Setup(void)
+{
+    char *bytes;
+    u_long length;
+
+    ScreenInit();
+
+    CdInit();
+
+    JoyPadInit();
+
+    ResetNextPrim(GetCurrentBuffer());
+
+    camera.position.vx = 500;
+    camera.position.vy = -1000;
+    camera.position.vz = -1500;
+    camera.lookat = (MATRIX){0};
+
+    bytes = FileRead("\\MODEL.BIN;1", &length);
+    printf("%d bytes were read from MODEL.BIN\n", length);
+
+    free(bytes);
+}
+
+void Update(void)
+{
+    EmptyOT(GetCurrentBuffer());
+
+    JoyPadUpdate();
+
+    if (JoyPadCheck(PAD1_LEFT))
+    {
+        camera.position.vx -= 50;
+    }
+
+    if (JoyPadCheck(PAD1_RIGHT))
+    {
+        camera.position.vx += 50;
+    }
+
+    if (JoyPadCheck(PAD1_UP))
+    {
+        camera.position.vy -= 50;
+    }
+
+    if (JoyPadCheck(PAD1_DOWN))
+    {
+        camera.position.vy += 50;
+    }
+
+    if (JoyPadCheck(PAD1_CROSS))
+    {
+        camera.position.vz += 50;
+    }
+
+    if (JoyPadCheck(PAD1_CIRCLE))
+    {
+        camera.position.vz -= 50;
+    }
+
+    cube.vel.vx += cube.acc.vx;
+    cube.vel.vy += cube.acc.vy;
+    cube.vel.vz += cube.acc.vz;
+
+    cube.position.vx += cube.vel.vx;
+    cube.position.vy += cube.vel.vy;
+    cube.position.vz += cube.vel.vz;
+
+    if (cube.position.vy + 200 > floor.position.vy)
+    {
+         cube.vel.vy *= -1;
+    }
+
+    LookAt(&camera, &camera.position, &cube.position, &(VECTOR){0, -ONE, 0});
+
+    RotMatrix(&cube.rotation, &cube.world);
+    TransMatrix(&cube.world, &cube.position);
+    ScaleMatrix(&cube.world, &cube.scale);
+
+    CompMatrixLV(&camera.lookat, &cube.world, &view);
+
+    SetRotMatrix(&view);
+    SetTransMatrix(&view);
+
+    for (i = 0; i < 6 * 4; i += 4)
+    {
+        poly = (POLY_G4*) GetNextPrim();
+        setPolyG4(poly);
+        setRGB0(poly, 255, 0, 255);
+        setRGB1(poly, 255, 255, 0);
+        setRGB2(poly, 0, 255, 255);
+        setRGB3(poly, 0, 255, 0);
+
+        nclip = RotAverageNclip4(&cube.vertices[cube.faces[i + 0]], &cube.vertices[cube.faces[i + 1]], &cube.vertices[cube.faces[i + 2]], &cube.vertices[cube.faces[i+3]], (long*) &poly->x0, (long*) &poly->x1, (long*) &poly->x2, (long*) &poly->x3, &p, &otz, &flg);
+        if (nclip < 0)
+        {
+            continue;
+        }
+
+        if ((otz > 0) && (otz < OT_LENGTH))
+        {
+            addPrim(GetOTAt(GetCurrentBuffer(), otz), poly);
+            IncrementNextPrim(sizeof(POLY_G4));
+        }
+    }
+
+    RotMatrix(&floor.rotation, &floor.world);
+    TransMatrix(&floor.world, &floor.position);
+    ScaleMatrix(&floor.world, &floor.scale);
+
+    CompMatrixLV(&camera.lookat, &floor.world, &view);
+
+    SetRotMatrix(&view);
+    SetTransMatrix(&view);
+
+    for (j = 0; j < 2 * 3; j += 3)
+    {
+        tri = (POLY_F3*) GetNextPrim();
+        setPolyF3(tri);
+        setRGB0(tri, 255, 0, 0);
+
+        nclip = RotAverageNclip3(&floor.vertices[floor.faces[j]], &floor.vertices[floor.faces[j + 1]], &floor.vertices[floor.faces[j + 2]], (long*) &tri->x0, (long*) &tri->x1, (long*) &tri->x2, &p, &otz, &flg);
+
+        if (nclip < 0)
+        {
+            continue;
+        }
+
+        if ((otz > 0) && (otz < OT_LENGTH))
+        {
+            addPrim(GetOTAt(GetCurrentBuffer(), otz), tri);
+            IncrementNextPrim(sizeof(POLY_F3));
+        }
+    }
+}
+
+void Render(void)
+{
+    DisplayFrame();
+}
+
+int main(void)
+{
+    Setup();
+
+    while (1)
+    {
+        Update();
+        Render();
+    }
+
+    return 0;
+}
