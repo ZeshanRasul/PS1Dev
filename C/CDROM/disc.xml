@@ -1,0 +1,9 @@
+<iso_project image_name="CDROM.bin" cue_sheet="CDROM.cue" no_xa="0">
+  <track type="data" xa_edc="true" new_type="false">
+    <directory_tree>
+      <file name="SYSTEM.CNF" type="data" source="SYSTEM.CNF"/>
+      <file name="MAIN.EXE" type="data" source="MAIN.EXE"/>
+        <file name="MODEL.BIN" type="data" source="assets\MODEL.BIN"/>
+    </directory_tree>
+  </track>
+</iso_project>

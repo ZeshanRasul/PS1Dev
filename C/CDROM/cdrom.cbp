@@ -56,6 +56,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="makefile.mak" />
+		<Unit filename="object.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="object.h" />
 		<Unit filename="utils.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -38,3 +38,44 @@ char *FileRead(char *filename, u_long *length)
 
     return buffer;
 }
+
+long GetLongLE(char *bytes, u_long *b)
+{
+    u_long value = 0;
+    value |= bytes[(*b)++] << 0;
+    value |= bytes[(*b)++] << 8;
+    value |= bytes[(*b)++] << 16;
+    value |= bytes[(*b)++] << 24;
+    return (long) value;
+}
+
+long GetLongBE(char *bytes, u_long *b)
+{
+    u_long value = 0;
+    value |= bytes[(*b)++] << 24;
+    value |= bytes[(*b)++] << 16;
+    value |= bytes[(*b)++] << 8;
+    value |= bytes[(*b)++] << 0;
+    return (long) value;
+}
+
+short GetShortLE(char *bytes, u_long *b)
+{
+    unsigned short value = 0;
+    value |= bytes[(*b)++] << 0;
+    value |= bytes[(*b)++] << 8;
+    return (short) value;
+}
+
+short GetShortBE(char *bytes, u_long *b)
+{
+    unsigned short value = 0;
+    value |= bytes[(*b)++] << 8;
+    value |= bytes[(*b)++] << 0;
+    return (short) value;
+}
+
+short GetChar(char *bytes, u_long *b)
+{
+    return bytes[(*b)++];
+}
