@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="SRC\main.c" open="1" top="1" tabpos="1">
+		<Cursor position="1710" topLine="78" />
+	</File>
+	<File name="SRC\object.h" open="1" top="0" tabpos="4">
+		<Cursor position="284" topLine="0" />
+	</File>
+	<File name="SRC\utils.c" open="1" top="0" tabpos="2">
+		<Cursor position="124" topLine="0" />
+	</File>
+	<File name="SRC\utils.h" open="1" top="0" tabpos="3">
+		<Cursor position="301" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>

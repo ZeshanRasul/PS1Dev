@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso_project image_name="GAME.ISO" cue_sheet="GAME.CUE" no_xa="0">
+
+    <track type="data">
+
+        <identifiers
+            system			="PLAYSTATION"
+            application		="PLAYSTATION"
+            volume			="MYDISC"
+            volume_set		="FAKEWIPEOUT"
+            publisher		="ME"
+            data_preparer	="MKPSXISO"
+            copyright		="COPYLEFT"
+        />
+
+        <license file="LCNSFILE\LICENSEE.DAT"/>
+        
+        <directory_tree>
+            <file name="SYSTEM.CNF"	type="data"	source="SYSTEM.TXT"/>
+            <file name="MAIN.EXE"	type="data"	source="FakeWipeout.ps-exe"/>
+            
+            <file name="ALLSH.PRM"  type="data" source="assets\WIPEOUT\COMMON\ALLSH.PRM"/>
+            <file name="ALLSH.CMP"  type="data" source="assets\WIPEOUT\COMMON\ALLSH.CMP"/>
+
+            <dir name="TRACK01">
+                <file name="LIBRARY.CMP" type="data" source="assets\WIPEOUT\TRACK01\LIBRARY.CMP"/>
+                <file name="TRACK.TRV" type="data" source="assets\WIPEOUT\TRACK01\TRACK.TRV"/>
+                <file name="TRACK.TRF" type="data" source="assets\WIPEOUT\TRACK01\TRACK.TRF"/>
+                <file name="TRACK.TRS" type="data" source="assets\WIPEOUT\TRACK01\TRACK.TRS"/>
+                <file name="LIBRARY.TTF" type="data" source="assets\WIPEOUT\TRACK01\LIBRARY.TTF"/>
+                <file name="SCENE.CMP" type="data" source="assets\WIPEOUT\TRACK01\SCENE.CMP"/>
+                <file name="SCENE.PRM" type="data" source="assets\WIPEOUT\TRACK01\SCENE.PRM"/>
+            </dir>
+
+            <dir name="TRACK02">
+                <file name="LIBRARY.CMP" type="data" source="assets\WIPEOUT\TRACK02\LIBRARY.CMP"/>
+                <file name="TRACK.TRV" type="data" source="assets\WIPEOUT\TRACK02\TRACK.TRV"/>
+                <file name="TRACK.TRF" type="data" source="assets\WIPEOUT\TRACK02\TRACK.TRF"/>
+                <file name="TRACK.TRS" type="data" source="assets\WIPEOUT\TRACK02\TRACK.TRS"/>
+                <file name="LIBRARY.TTF" type="data" source="assets\WIPEOUT\TRACK02\LIBRARY.TTF"/>
+                <file name="SCENE.CMP" type="data" source="assets\WIPEOUT\TRACK02\SCENE.CMP"/>
+                <file name="SCENE.PRM" type="data" source="assets\WIPEOUT\TRACK02\SCENE.PRM"/>
+            </dir>
+
+            <dir name="TRACK03">
+                <file name="LIBRARY.CMP" type="data" source="assets\WIPEOUT\TRACK03\LIBRARY.CMP"/>
+                <file name="TRACK.TRV" type="data" source="assets\WIPEOUT\TRACK03\TRACK.TRV"/>
+                <file name="TRACK.TRF" type="data" source="assets\WIPEOUT\TRACK03\TRACK.TRF"/>
+                <file name="TRACK.TRS" type="data" source="assets\WIPEOUT\TRACK03\TRACK.TRS"/>
+                <file name="LIBRARY.TTF" type="data" source="assets\WIPEOUT\TRACK03\LIBRARY.TTF"/>
+                <file name="SCENE.CMP" type="data" source="assets\WIPEOUT\TRACK03\SCENE.CMP"/>
+                <file name="SCENE.PRM" type="data" source="assets\WIPEOUT\TRACK03\SCENE.PRM"/>
+            </dir>
+
+            <dir name="TRACK04">
+                <file name="LIBRARY.CMP" type="data" source="assets\WIPEOUT\TRACK04\LIBRARY.CMP"/>
+                <file name="TRACK.TRV" type="data" source="assets\WIPEOUT\TRACK04\TRACK.TRV"/>
+                <file name="TRACK.TRF" type="data" source="assets\WIPEOUT\TRACK04\TRACK.TRF"/>
+                <file name="TRACK.TRS" type="data" source="assets\WIPEOUT\TRACK04\TRACK.TRS"/>
+                <file name="LIBRARY.TTF" type="data" source="assets\WIPEOUT\TRACK04\LIBRARY.TTF"/>
+                <file name="SCENE.CMP" type="data" source="assets\WIPEOUT\TRACK04\SCENE.CMP"/>
+                <file name="SCENE.PRM" type="data" source="assets\WIPEOUT\TRACK04\SCENE.PRM"/>
+            </dir>
+
+            <dir name="TRACK05">
+                <file name="LIBRARY.CMP" type="data" source="assets\WIPEOUT\TRACK05\LIBRARY.CMP"/>
+                <file name="TRACK.TRV" type="data" source="assets\WIPEOUT\TRACK05\TRACK.TRV"/>
+                <file name="TRACK.TRF" type="data" source="assets\WIPEOUT\TRACK05\TRACK.TRF"/>
+                <file name="TRACK.TRS" type="data" source="assets\WIPEOUT\TRACK05\TRACK.TRS"/>
+                <file name="LIBRARY.TTF" type="data" source="assets\WIPEOUT\TRACK05\LIBRARY.TTF"/>
+                <file name="SCENE.CMP" type="data" source="assets\WIPEOUT\TRACK05\SCENE.CMP"/>
+                <file name="SCENE.PRM" type="data" source="assets\WIPEOUT\TRACK05\SCENE.PRM"/>
+            </dir>
+            
+            <dummy sectors="1024"/>
+            
+        </directory_tree>
+        
+    </track>
+    
+</iso_project>
