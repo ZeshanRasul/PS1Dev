@@ -52,6 +52,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="SRC\joypad.h" />
+		<Unit filename="SRC\lzss.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="SRC\lzss.h" />
 		<Unit filename="SRC\main.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -59,6 +63,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="SRC\object.h" />
+		<Unit filename="SRC\texture.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="SRC\texture.h" />
 		<Unit filename="SRC\utils.c">
 			<Option compilerVar="CC" />
 		</Unit>

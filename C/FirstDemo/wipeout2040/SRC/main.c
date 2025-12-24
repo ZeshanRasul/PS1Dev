@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "utils.h"
 #include "object.h"
+#include "texture.h"
 
 Camera camera;
 Object object;
@@ -22,6 +23,8 @@ void Setup(void)
 
     setVector(&camera.position, 0, -600, -900);
     camera.lookat = (MATRIX){0};
+
+    LoadObjectCMP("\\ALLSH.CMP;1");
 
     LoadObjectPRM(&object, "\\ALLSH.PRM;1");
 }

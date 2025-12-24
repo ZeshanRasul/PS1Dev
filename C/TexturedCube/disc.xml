@@ -1,0 +1,10 @@
+<iso_project image_name="TEXTUREDCUBE.bin" cue_sheet="TEXTUREDCUBE.cue" no_xa="0">
+  <track type="data" xa_edc="true" new_type="false">
+    <directory_tree>
+      <file name="SYSTEM.CNF" type="data" source="SYSTEM.CNF"/>
+      <file name="MAIN.EXE" type="data" source="MAIN.EXE"/>
+      <file name="MODEL.BIN" type="data" source="assets\MODEL.BIN"/>
+      <file name="BRICKS.TIM" type="data" source="assets\BRICKS.TIM"/>
+    </directory_tree>
+  </track>
+</iso_project>

@@ -1,0 +1,10 @@
+<iso_project image_name="WIPEOUT2040.0.2.bin" cue_sheet="WIPEOUT2040.0.2.cue" no_xa="0">
+  <track type="data" xa_edc="true" new_type="false">
+    <directory_tree>
+      <file name="SYSTEM.CNF" type="data" source="SYSTEM.CNF"/>
+      <file name="MAIN.EXE" type="data" source="MAIN.EXE"/>
+      <file name="ALLSH.PRM" type="data" source="assets\common\ALLSH.PRM"/>
+      <file name="ALLSH.CMP" type="data" source="assets\common\ALLSH.CMP"/>
+    </directory_tree>
+  </track>
+</iso_project>
