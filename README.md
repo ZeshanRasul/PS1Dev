@@ -7,3 +7,14 @@ My chief goal of this project is to create a technical demo running on real PS3 
 
 Not only is this an exciting project from a nostalgia perspective, most importantly it continues to provide an excellent understanding of console development ensuring I can apply these skills in modern console development. All of my projects are tested on real hardware, while leveraging emulators for sense checking and quicker feedback loops in between major development milestones. 
 
+## Latest Demo Examples
+
+![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured1.png)
+
+![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured2.png)
+
+![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured4.png)
+
+![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured3.png)
+
+Figures 1-4: The same FEISAR Sofia ship model used by the Wipeout devs textured and rendered in my Wipeout clone. Working on both PS1 hardware and emulators. (Screenshots taken in emulator)
