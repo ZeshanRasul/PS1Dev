@@ -7,12 +7,19 @@
 #include "utils.h"
 #include "object.h"
 #include "texture.h"
+#include <stdlib.h>
 
 Camera camera;
-Object object;
+
+Object *ships;
+Object *ship;
+
+u_short shipindex = 0;
 
 void Setup(void)
 {
+    u_short shipstarttexture;
+
     ScreenInit();
 
     CdInit();
@@ -24,30 +31,46 @@ void Setup(void)
     setVector(&camera.position, 0, -600, -900);
     camera.lookat = (MATRIX){0};
 
+    shipstarttexture = GetTextureCount();
     LoadObjectCMP("\\ALLSH.CMP;1");
+    ships = LoadObjectPRM("\\ALLSH.PRM;1", shipstarttexture);
 
-    LoadObjectPRM(&object, "\\ALLSH.PRM;1");
 }
 
 void Update(void)
 {
+    u_short i;
+
     EmptyOT(GetCurrBuff());
 
     JoyPadUpdate();
 
     if (JoyPadCheck(PAD1_LEFT))
     {
-        object.rotation.vy += 15;
+        if (shipindex > 0)
+        {
+            shipindex--;
+        }
     }
 
     if (JoyPadCheck(PAD1_RIGHT))
     {
-        object.rotation.vy -= 15;
+        if (shipindex < 7)
+        {
+            shipindex++;
+        }
     }
 
-    LookAt(&camera, &camera.position, &object.position, &(VECTOR){0, -ONE, 0});
+    ship = ships;
 
-    RenderObject(&object, &camera);
+    for (i = 0; i < shipindex; i++)
+    {
+        ship = ship->next;
+    }
+
+    LookAt(&camera, &camera.position, &ship->position, &(VECTOR){0, -ONE, 0});
+
+    RenderObject(ship, &camera);
 }
 
 void Render(void)

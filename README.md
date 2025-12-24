@@ -9,11 +9,13 @@ Not only is this an exciting project from a nostalgia perspective, most importan
 
 ## Latest Demo Examples
 
-![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured1.png)
+### Wipeout Clone
 
-![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured2.png)
+![Wipeout Sofia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured1.png)
 
-![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured4.png)
+![Wipeout Sofia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured2.png)
+
+![Wipeout Sofia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured4.png)
 
 ![Wipeout Sophia Ship Textured and Rendered](./Docs/Images/Wipeout-Ship_Textured3.png)
 

@@ -33,7 +33,6 @@
 		</Compiler>
 		<Unit filename="BUILDISO.BAT" />
 		<Unit filename="CDLAYOUT.CTI" />
-		<Unit filename="CDLAYOUT.xml" />
 		<Unit filename="LCNSFILE\LICENSEE.DAT" />
 		<Unit filename="SRC\camera.c">
 			<Option compilerVar="CC" />

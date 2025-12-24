@@ -8,7 +8,7 @@
 #include "inline_n.h"
 
 
-void LoadObjectPRM(Object *object, char *filename)
+Object *LoadObjectPRM(char *filename, u_short starttexture)
 {
     char *bytes;
     u_long length;
@@ -18,12 +18,16 @@ void LoadObjectPRM(Object *object, char *filename)
     u_short voffset;
     Texture *texture;
 
+    Object *firstobj;
+    Object *prevobj;
+    Object *object;
+
     bytes = (u_char*) FileRead(filename, &length);
 
     if (bytes == NULL)
     {
         printf("Error reading %s from the CD\n", filename);
-        return;
+        return NULL;
     }
     else
     {
@@ -31,375 +35,403 @@ void LoadObjectPRM(Object *object, char *filename)
     }
 
     b = 0;
+    prevobj = NULL;
 
-    for (i = 0; i < 16; i++)
+    while (b < length)
     {
-        object->name[i] = GetChar(bytes, &b);
+        object = malloc (sizeof(Object));
+
+        if (prevobj == NULL)
+        {
+            firstobj = object;
+        }
+        else
+        {
+            prevobj->next = object;
+        }
+
+        prevobj = object;
+
+        for (i = 0; i < 16; i++)
+        {
+            object->name[i] = GetChar(bytes, &b);
+        }
+
+        printf("Loading &object: %s\n", object->name);
+
+        object->numvertices = GetShortBE(bytes, &b);
+        object->vertices = NULL;
+        printf("Loading: %s with %d normals\n", object->name, object->numvertices);
+        b += 6;
+
+
+
+
+        object->numnormals = GetShortBE(bytes, &b);
+        object->normals = NULL;
+        printf("Loading: %s with %d normals\n", object->name, object->numnormals);
+
+        b += 6;
+
+        object->numprimitives = GetShortBE(bytes, &b);
+        printf("Loading: %s with %d primitives\n", object->name, object->numprimitives);
+
+        b += 22;
+
+        object->flags = GetShortBE(bytes, &b);
+
+        b += 26;
+
+        object->origin.vx = GetLongBE(bytes, &b);
+        object->origin.vy = GetLongBE(bytes, &b);
+        object->origin.vz = GetLongBE(bytes, &b);
+        printf("Object origin x: %d, y: %d, z: %d\n", object->origin.vx, object->origin.vy, object->origin.vz);
+
+        b += 48;
+
+        object->vertices = (SVECTOR*) malloc(object->numvertices * sizeof(SVECTOR));
+
+        for (i = 0; i < object->numvertices; i++)
+        {
+            object->vertices[i].vx = (GetShortBE(bytes, &b));
+            object->vertices[i].vy = (GetShortBE(bytes, &b));
+            object->vertices[i].vz = (GetShortBE(bytes, &b));
+            b += 2;
+            printf("Loading vertex %d, with x: %d, y: %d, z: %d\n", i, object->vertices[i].vx, object->vertices[i].vy, object->vertices[i].vz);
+        }
+
+        printf("Loaded: %d vertices from %s\n", object->numvertices, object->name);
+
+        object->normals = (SVECTOR*) malloc(object->numnormals * sizeof(SVECTOR));
+
+        for (i = 0; i < object->numnormals; i++)
+        {
+            object->normals[i].vx = GetShortBE(bytes, &b);
+            object->normals[i].vy = GetShortBE(bytes, &b);
+            object->normals[i].vz = GetShortBE(bytes, &b);
+            b += 2;
+            printf("Loading normals %d, with x: %d, y: %d, z: %d\n", i, object->normals[i].vx, object->normals[i].vy, object->normals[i].vz);
+        }
+        printf("Loaded: %d normals from %s\n", object->numnormals, object->name);
+
+          object->primitives = (PrimitiveNode*) malloc(object->numprimitives * sizeof(PrimitiveNode));
+          for (i = 0; i < object->numprimitives; i++) {
+            object->primitives[i].type = GetShortBE(bytes, &b);
+            object->primitives[i].flag = GetShortBE(bytes, &b);
+            switch (object->primitives[i].type) {
+              case TypeF3: {
+                F3 *prm;
+                printf("Loading primitive type F3 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(F3));
+                prm            = (F3*) object->primitives[i].primitive;
+                prm->type      = TypeF3;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->pad1      = GetShortBE(bytes, &b);
+                prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                break;
+              }
+              case TypeFT3: {
+                FT3 *prm;
+                printf("Loading primitive type FT3 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(FT3));
+                prm            = (FT3*) object->primitives[i].primitive;
+                prm->type      = TypeFT3;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->texture   = GetShortBE(bytes, &b);
+                prm->clut      = GetShortBE(bytes, &b);
+                prm->tpage     = GetShortBE(bytes, &b);
+                prm->u0        = GetChar(bytes, &b);
+                prm->v0        = GetChar(bytes, &b);
+                prm->u1        = GetChar(bytes, &b);
+                prm->v1        = GetChar(bytes, &b);
+                prm->u2        = GetChar(bytes, &b);
+                prm->v2        = GetChar(bytes, &b);
+                prm->pad1      = GetShortBE(bytes, &b);
+                prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+
+                prm->texture +=  starttexture;
+                texture = GetFromTextureStore(prm->texture);
+                prm->tpage = texture->tpage;
+                prm->clut = texture->clut;
+                uoffset = texture->u0;
+                voffset = texture->v0;
+
+                prm->u0 += uoffset;
+                prm->v0 += voffset;
+                prm->u1 += uoffset;
+                prm->v1 += voffset;
+                prm->u2 += uoffset;
+                prm->v2 += voffset;
+
+
+
+                break;
+              }
+              case TypeF4: {
+                F4 *prm;
+                printf("Loading primitive type F4 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(F4));
+                prm            = (F4*) object->primitives[i].primitive;
+                prm->type      = TypeF4;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->coords[3] = GetShortBE(bytes, &b);
+                prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                break;
+              }
+              case TypeFT4: {
+                FT4 *prm;
+                printf("Loading primitive type FT4 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(FT4));
+                prm            = (FT4*) object->primitives[i].primitive;
+                prm->type      = TypeFT4;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->coords[3] = GetShortBE(bytes, &b);
+                prm->texture   = GetShortBE(bytes, &b);
+                prm->clut      = GetShortBE(bytes, &b);
+                prm->tpage     = GetShortBE(bytes, &b);
+                prm->u0        = GetChar(bytes, &b);
+                prm->v0        = GetChar(bytes, &b);
+                prm->u1        = GetChar(bytes, &b);
+                prm->v1        = GetChar(bytes, &b);
+                prm->u2        = GetChar(bytes, &b);
+                prm->v2        = GetChar(bytes, &b);
+                prm->u3        = GetChar(bytes, &b);
+                prm->v3        = GetChar(bytes, &b);
+                prm->pad1      = GetShortBE(bytes, &b);
+                prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+
+                prm->texture += starttexture;
+                texture = GetFromTextureStore(prm->texture);
+
+                prm->clut = texture->clut;
+                prm->tpage = texture->tpage;
+
+                uoffset = texture->u0;
+                voffset = texture->v0;
+
+                prm->u0 += uoffset;
+                prm->v0 += voffset;
+                prm->u1 += uoffset;
+                prm->v1 += voffset;
+                prm->u2 += uoffset;
+                prm->v2 += voffset;
+                prm->u3 += uoffset;
+                prm->v3 += voffset;
+                break;
+              }
+              case TypeG3: {
+                G3 *prm;
+                printf("Loading primitive type G3 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(G3));
+                prm            = (G3*) object->primitives[i].primitive;
+                prm->type      = TypeG3;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->pad1      = GetShortBE(bytes, &b);
+                prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                break;
+              }
+              case TypeGT3: {
+                GT3 *prm;
+                printf("Loading primitive type GT3 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(GT3));
+                prm            = (GT3*) object->primitives[i].primitive;
+                prm->type      = TypeGT3;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->texture   = GetShortBE(bytes, &b);
+                prm->clut      = GetShortBE(bytes, &b);
+                prm->tpage     = GetShortBE(bytes, &b);
+                prm->u0        = GetChar(bytes, &b);
+                prm->v0        = GetChar(bytes, &b);
+                prm->u1        = GetChar(bytes, &b);
+                prm->v1        = GetChar(bytes, &b);
+                prm->u2        = GetChar(bytes, &b);
+                prm->v2        = GetChar(bytes, &b);
+                prm->pad1      = GetShortBE(bytes, &b);
+                prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+
+
+                prm->texture += starttexture;
+                texture = GetFromTextureStore(prm->texture);
+                prm->clut = texture->clut;
+                prm->tpage = texture->tpage;
+                uoffset = texture->u0;
+                voffset = texture->v0;
+
+
+
+                prm->u0 += uoffset;
+                prm->v0 += voffset;
+                prm->u1 += uoffset;
+                prm->v1 += voffset;
+                prm->u2 += uoffset;
+                prm->v2 += voffset;
+
+                break;
+              }
+              case TypeG4: {
+                G4 *prm;
+                printf("Loading primitive type G4 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(G4));
+                prm            = (G4*) object->primitives[i].primitive;
+                prm->type      = TypeG4;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->coords[3] = GetShortBE(bytes, &b);
+                prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[3]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                break;
+              }
+              case TypeGT4: {
+                GT4 *prm;
+                printf("Loading primitive type GT4 \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(GT4));
+                prm            = (GT4*) object->primitives[i].primitive;
+                prm->type      = TypeGT4;
+                prm->coords[0] = GetShortBE(bytes, &b);
+                prm->coords[1] = GetShortBE(bytes, &b);
+                prm->coords[2] = GetShortBE(bytes, &b);
+                prm->coords[3] = GetShortBE(bytes, &b);
+                prm->texture   = GetShortBE(bytes, &b);
+                prm->clut      = GetShortBE(bytes, &b);
+                prm->tpage     = GetShortBE(bytes, &b);
+                prm->u0        = GetChar(bytes, &b);
+                prm->v0        = GetChar(bytes, &b);
+                prm->u1        = GetChar(bytes, &b);
+                prm->v1        = GetChar(bytes, &b);
+                prm->u2        = GetChar(bytes, &b);
+                prm->v2        = GetChar(bytes, &b);
+                prm->u3        = GetChar(bytes, &b);
+                prm->v3        = GetChar(bytes, &b);
+                prm->pad1      = GetShortBE(bytes, &b);
+                prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                prm->color[3]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+
+                prm->texture += starttexture;
+                texture = GetFromTextureStore(prm->texture);
+
+                prm->tpage = texture->tpage;
+                prm->clut = texture->clut;
+
+                uoffset = texture->u0;
+                voffset = texture->v0;
+
+                prm->u0 += uoffset;
+                prm->v0 += voffset;
+                prm->u1 += uoffset;
+                prm->v1 += voffset;
+                prm->u2 += uoffset;
+                prm->v2 += voffset;
+                prm->u3 += uoffset;
+                prm->v3 += voffset;
+
+
+
+                break;
+              }
+              case TypeTSPR:
+              case TypeBSPR: {
+                SPR *prm;
+                printf("Loading primitive type SPR \n");
+                object->primitives[i].primitive = (Prm*) malloc(sizeof(SPR));
+                prm            = (SPR*) object->primitives[i].primitive;
+                prm->type      = TypeTSPR;
+                prm->coord     = GetShortBE(bytes, &b);
+                prm->width     = GetShortBE(bytes, &b);
+                prm->height    = GetShortBE(bytes, &b);
+                prm->texture   = GetShortBE(bytes, &b);
+                prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
+                break;
+              }
+              case TypeSpline: {
+                printf("Loading primitive type Spline \n");
+                b += 52; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypePointLight: {
+                printf("Loading primitive type PointLight\n");
+                b += 24; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeSpotLight: {
+                printf("Loading primitive type SpotLight\n");
+                b += 36; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeInfiniteLight: {
+                printf("Loading primitive type InfiniteLight\n");
+                b += 12; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSF3: {
+                printf("Loading primitive type LSF3\n");
+                b += 12; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSFT3: {
+                printf("Loading primitive type LSFT3\n");
+                b += 24; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSF4: {
+                printf("Loading primitive type LSF4\n");
+                b += 16; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSFT4: {
+                printf("Loading primitive type LSFT4\n");
+                b += 28; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSG3: {
+                printf("Loading primitive type LSG3\n");
+                b += 24; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSGT3: {
+                printf("Loading primitive type LSGT3\n");
+                b += 36; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSG4: {
+                printf("Loading primitive type LSG4\n");
+                b += 32; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+              case TypeLSGT4: {
+                printf("Loading primitive type LSGT4\n");
+                b += 42; // --> skip this amount of bytes to bypass this primitive type
+                break;
+              }
+            }
+          }
+          // Populate &object[j]'s initial transform values
+            object->position = (VECTOR){object->origin.vx, object->origin.vy, object->origin.vz};
+            object->scale    = (VECTOR){ONE, ONE, ONE};
+            object->rotation = (SVECTOR){0, 0, 0};
     }
 
-    printf("Loading object: %s\n", object->name);
-
-    object->numvertices = GetShortBE(bytes, &b);
-    object->vertices = NULL;
-    printf("Loading: %s with %d normals\n", object->name, object->numvertices);
-    b += 6;
-
-    object->numnormals = GetShortBE(bytes, &b);
-    object->normals = NULL;
-    printf("Loading: %s with %d normals\n", object->name, object->numnormals);
-
-    b += 6;
-
-    object->numprimitives = GetShortBE(bytes, &b);
-    printf("Loading: %s with %d primitives\n", object->name, object->numprimitives);
-
-    b += 22;
-
-    object->flags = GetShortBE(bytes, &b);
-
-    b += 26;
-
-    object->origin.vx = GetLongBE(bytes, &b);
-    object->origin.vy = GetLongBE(bytes, &b);
-    object->origin.vz = GetLongBE(bytes, &b);
-    printf("Object origin x: %d, y: %d, z: %d\n", object->origin.vx, object->origin.vy, object->origin.vz);
-
-    b += 48;
-
-    object->vertices = (SVECTOR*) malloc(object->numvertices * sizeof(SVECTOR));
-
-    for (i = 0; i < object->numvertices; i++)
-    {
-        object->vertices[i].vx = (GetShortBE(bytes, &b));
-        object->vertices[i].vy = (GetShortBE(bytes, &b));
-        object->vertices[i].vz = (GetShortBE(bytes, &b));
-        b += 2;
-        printf("Loading vertex %d, with x: %d, y: %d, z: %d\n", i, object->vertices[i].vx, object->vertices[i].vy, object->vertices[i].vz);
-    }
-
-    printf("Loaded: %d vertices from %s\n", object->numvertices, object->name);
-
-    object->normals = (SVECTOR*) malloc(object->numnormals * sizeof(SVECTOR));
-
-    for (i = 0; i < object->numnormals; i++)
-    {
-        object->normals[i].vx = GetShortBE(bytes, &b);
-        object->normals[i].vy = GetShortBE(bytes, &b);
-        object->normals[i].vz = GetShortBE(bytes, &b);
-        b += 2;
-        printf("Loading normals %d, with x: %d, y: %d, z: %d\n", i, object->normals[i].vx, object->normals[i].vy, object->normals[i].vz);
-    }
-    printf("Loaded: %d normals from %s\n", object->numnormals, object->name);
-
- object->primitives = (PrimitiveNode*) malloc(object->numprimitives * sizeof(PrimitiveNode));
-  for (i = 0; i < object->numprimitives; i++) {
-    object->primitives[i].type = GetShortBE(bytes, &b);
-    object->primitives[i].flag = GetShortBE(bytes, &b);
-    switch (object->primitives[i].type) {
-      case TypeF3: {
-        F3 *prm;
-        printf("Loading primitive type F3 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(F3));
-        prm            = (F3*) object->primitives[i].primitive;
-        prm->type      = TypeF3;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->pad1      = GetShortBE(bytes, &b);
-        prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        break;
-      }
-      case TypeFT3: {
-        FT3 *prm;
-        printf("Loading primitive type FT3 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(FT3));
-        prm            = (FT3*) object->primitives[i].primitive;
-        prm->type      = TypeFT3;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->texture   = GetShortBE(bytes, &b);
-        prm->clut      = GetShortBE(bytes, &b);
-        prm->tpage     = GetShortBE(bytes, &b);
-        prm->u0        = GetChar(bytes, &b);
-        prm->v0        = GetChar(bytes, &b);
-        prm->u1        = GetChar(bytes, &b);
-        prm->v1        = GetChar(bytes, &b);
-        prm->u2        = GetChar(bytes, &b);
-        prm->v2        = GetChar(bytes, &b);
-        prm->pad1      = GetShortBE(bytes, &b);
-        prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-
-        texture = GetFromTextureStore(prm->texture);
-
-        uoffset = texture->u0;
-        voffset = texture->v0;
-
-        prm->u0 += uoffset;
-        prm->v0 += voffset;
-        prm->u1 += uoffset;
-        prm->v1 += voffset;
-        prm->u2 += uoffset;
-        prm->v2 += voffset;
-
-        prm->tpage = texture->tpage;
-        prm->clut = texture->clut;
-
-        break;
-      }
-      case TypeF4: {
-        F4 *prm;
-        printf("Loading primitive type F4 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(F4));
-        prm            = (F4*) object->primitives[i].primitive;
-        prm->type      = TypeF4;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->coords[3] = GetShortBE(bytes, &b);
-        prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        break;
-      }
-      case TypeFT4: {
-        FT4 *prm;
-        printf("Loading primitive type FT4 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(FT4));
-        prm            = (FT4*) object->primitives[i].primitive;
-        prm->type      = TypeFT4;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->coords[3] = GetShortBE(bytes, &b);
-        prm->texture   = GetShortBE(bytes, &b);
-        prm->clut      = GetShortBE(bytes, &b);
-        prm->tpage     = GetShortBE(bytes, &b);
-        prm->u0        = GetChar(bytes, &b);
-        prm->v0        = GetChar(bytes, &b);
-        prm->u1        = GetChar(bytes, &b);
-        prm->v1        = GetChar(bytes, &b);
-        prm->u2        = GetChar(bytes, &b);
-        prm->v2        = GetChar(bytes, &b);
-        prm->u3        = GetChar(bytes, &b);
-        prm->v3        = GetChar(bytes, &b);
-        prm->pad1      = GetShortBE(bytes, &b);
-        prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-
-        texture = GetFromTextureStore(prm->texture);
-
-        uoffset = texture->u0;
-        voffset = texture->v0;
-
-        prm->u0 += uoffset;
-        prm->v0 += voffset;
-        prm->u1 += uoffset;
-        prm->v1 += voffset;
-        prm->u2 += uoffset;
-        prm->v2 += voffset;
-        prm->u3 += uoffset;
-        prm->v3 += voffset;
-
-        prm->tpage = texture->tpage;
-        prm->clut = texture->clut;
-
-        break;
-      }
-      case TypeG3: {
-        G3 *prm;
-        printf("Loading primitive type G3 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(G3));
-        prm            = (G3*) object->primitives[i].primitive;
-        prm->type      = TypeG3;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->pad1      = GetShortBE(bytes, &b);
-        prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        break;
-      }
-      case TypeGT3: {
-        GT3 *prm;
-        printf("Loading primitive type GT3 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(GT3));
-        prm            = (GT3*) object->primitives[i].primitive;
-        prm->type      = TypeGT3;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->texture   = GetShortBE(bytes, &b);
-        prm->clut      = GetShortBE(bytes, &b);
-        prm->tpage     = GetShortBE(bytes, &b);
-        prm->u0        = GetChar(bytes, &b);
-        prm->v0        = GetChar(bytes, &b);
-        prm->u1        = GetChar(bytes, &b);
-        prm->v1        = GetChar(bytes, &b);
-        prm->u2        = GetChar(bytes, &b);
-        prm->v2        = GetChar(bytes, &b);
-        prm->pad1      = GetShortBE(bytes, &b);
-        prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-
-        texture = GetFromTextureStore(prm->texture);
-
-        uoffset = texture->u0;
-        voffset = texture->v0;
-
-        prm->u0 += uoffset;
-        prm->v0 += voffset;
-        prm->u1 += uoffset;
-        prm->v1 += voffset;
-        prm->u2 += uoffset;
-        prm->v2 += voffset;
-
-        prm->tpage = texture->tpage;
-        prm->clut = texture->clut;
-
-        break;
-      }
-      case TypeG4: {
-        G4 *prm;
-        printf("Loading primitive type G4 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(G4));
-        prm            = (G4*) object->primitives[i].primitive;
-        prm->type      = TypeG4;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->coords[3] = GetShortBE(bytes, &b);
-        prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[3]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        break;
-      }
-      case TypeGT4: {
-        GT4 *prm;
-        printf("Loading primitive type GT4 \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(GT4));
-        prm            = (GT4*) object->primitives[i].primitive;
-        prm->type      = TypeGT4;
-        prm->coords[0] = GetShortBE(bytes, &b);
-        prm->coords[1] = GetShortBE(bytes, &b);
-        prm->coords[2] = GetShortBE(bytes, &b);
-        prm->coords[3] = GetShortBE(bytes, &b);
-        prm->texture   = GetShortBE(bytes, &b);
-        prm->clut      = GetShortBE(bytes, &b);
-        prm->tpage     = GetShortBE(bytes, &b);
-        prm->u0        = GetChar(bytes, &b);
-        prm->v0        = GetChar(bytes, &b);
-        prm->u1        = GetChar(bytes, &b);
-        prm->v1        = GetChar(bytes, &b);
-        prm->u2        = GetChar(bytes, &b);
-        prm->v2        = GetChar(bytes, &b);
-        prm->u3        = GetChar(bytes, &b);
-        prm->v3        = GetChar(bytes, &b);
-        prm->pad1      = GetShortBE(bytes, &b);
-        prm->color[0]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[1]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[2]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        prm->color[3]  = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-
-        texture = GetFromTextureStore(prm->texture);
-
-        uoffset = texture->u0;
-        voffset = texture->v0;
-
-        prm->u0 += uoffset;
-        prm->v0 += voffset;
-        prm->u1 += uoffset;
-        prm->v1 += voffset;
-        prm->u2 += uoffset;
-        prm->v2 += voffset;
-        prm->u3 += uoffset;
-        prm->v3 += voffset;
-
-        prm->tpage = texture->tpage;
-        prm->clut = texture->clut;
-
-        break;
-      }
-      case TypeTSPR:
-      case TypeBSPR: {
-        SPR *prm;
-        printf("Loading primitive type SPR \n");
-        object->primitives[i].primitive = (Prm*) malloc(sizeof(SPR));
-        prm            = (SPR*) object->primitives[i].primitive;
-        prm->type      = TypeTSPR;
-        prm->coord     = GetShortBE(bytes, &b);
-        prm->width     = GetShortBE(bytes, &b);
-        prm->height    = GetShortBE(bytes, &b);
-        prm->texture   = GetShortBE(bytes, &b);
-        prm->color     = (CVECTOR) { GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b), GetChar(bytes, &b) };
-        break;
-      }
-      case TypeSpline: {
-        printf("Loading primitive type Spline \n");
-        b += 52; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypePointLight: {
-        printf("Loading primitive type PointLight\n");
-        b += 24; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeSpotLight: {
-        printf("Loading primitive type SpotLight\n");
-        b += 36; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeInfiniteLight: {
-        printf("Loading primitive type InfiniteLight\n");
-        b += 12; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSF3: {
-        printf("Loading primitive type LSF3\n");
-        b += 12; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSFT3: {
-        printf("Loading primitive type LSFT3\n");
-        b += 24; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSF4: {
-        printf("Loading primitive type LSF4\n");
-        b += 16; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSFT4: {
-        printf("Loading primitive type LSFT4\n");
-        b += 28; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSG3: {
-        printf("Loading primitive type LSG3\n");
-        b += 24; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSGT3: {
-        printf("Loading primitive type LSGT3\n");
-        b += 36; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSG4: {
-        printf("Loading primitive type LSG4\n");
-        b += 32; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-      case TypeLSGT4: {
-        printf("Loading primitive type LSGT4\n");
-        b += 42; // --> skip this amount of bytes to bypass this primitive type
-        break;
-      }
-    }
-  }
-  // Populate object's initial transform values
-  object->position = (VECTOR){object->origin.vx, object->origin.vy, object->origin.vz};
-  object->scale    = (VECTOR){ONE, ONE, ONE};
-  object->rotation = (SVECTOR){0, 0, 0};
+    return firstobj;
 }
 
 void RenderObject(Object *object, Camera *camera) {
@@ -410,6 +442,7 @@ void RenderObject(Object *object, Camera *camera) {
   MATRIX worldmat;
   MATRIX viewmat;
 
+
   RotMatrix(&object->rotation, &worldmat);
   TransMatrix(&worldmat, &object->position);
   ScaleMatrix(&worldmat, &object->scale);
@@ -419,7 +452,7 @@ void RenderObject(Object *object, Camera *camera) {
   SetRotMatrix(&viewmat);
   SetTransMatrix(&viewmat);
 
-  // Loop all object primitives
+  // Loop all &object primitives
   for (i = 0; i < object->numprimitives; i++) {
     switch (object->primitives[i].type) {
       case TypeF3: {

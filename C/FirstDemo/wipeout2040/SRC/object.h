@@ -6,6 +6,40 @@
 #include <stddef.h>
 #include "camera.h"
 
+/* Primitive Flags */
+#define  SingleSided    0x0001
+#define  ShipEngine     0x0002
+#define  Translucent    0x0004
+
+/* Primitive Types */
+#define     TypeF3               1
+#define     TypeFT3              2
+#define     TypeF4               3
+#define     TypeFT4              4
+#define     TypeG3               5
+#define     TypeGT3              6
+#define     TypeG4               7
+#define     TypeGT4              8
+
+#define     TypeLF2              9
+#define     TypeTSPR             10
+#define     TypeBSPR             11
+
+#define     TypeLSF3             12
+#define     TypeLSFT3            13
+#define     TypeLSF4             14
+#define     TypeLSFT4            15
+#define     TypeLSG3             16
+#define     TypeLSGT3            17
+#define     TypeLSG4             18
+#define     TypeLSGT4            19
+
+#define     TypeSpline           20
+
+#define     TypeInfiniteLight    21
+#define     TypePointLight       22
+#define     TypeSpotLight        23
+
 typedef struct F3 {
    short             type;          /* Type of primitive */
    short             flag;
@@ -276,39 +310,7 @@ typedef struct InfiniteLight {
 } InfiniteLight;
 
 
-/* Primitive Flags */
-#define  SingleSided    0x0001
-#define  ShipEngine     0x0002
-#define  Translucent    0x0004
 
-/* Primitive Types */
-#define     TypeF3               1
-#define     TypeFT3              2
-#define     TypeF4               3
-#define     TypeFT4              4
-#define     TypeG3               5
-#define     TypeGT3              6
-#define     TypeG4               7
-#define     TypeGT4              8
-
-#define     TypeLF2              9
-#define     TypeTSPR             10
-#define     TypeBSPR             11
-
-#define     TypeLSF3             12
-#define     TypeLSFT3            13
-#define     TypeLSF4             14
-#define     TypeLSFT4            15
-#define     TypeLSG3             16
-#define     TypeLSGT3            17
-#define     TypeLSG4             18
-#define     TypeLSGT4            19
-
-#define     TypeSpline           20
-
-#define     TypeInfiniteLight    21
-#define     TypePointLight       22
-#define     TypeSpotLight        23
 
 /* Primitive Union (since we want to only hold one of it per list node) */
 typedef union Prm {
@@ -345,6 +347,7 @@ typedef struct Object {
     char name[16];
 
     short flags;
+    VECTOR origin;
 
     short numvertices;
     SVECTOR *vertices;
@@ -355,13 +358,14 @@ typedef struct Object {
     short numprimitives;
     PrimitiveNode *primitives;
 
-    VECTOR origin;
     SVECTOR rotation;
     VECTOR position;
     VECTOR scale;
+
+    struct Object *next;
 } Object;
 
-void LoadObjectPRM(Object *object, char *filename);
+Object *LoadObjectPRM(char *filename, u_short starttexture);
 
 void RenderObject(Object *object, Camera *camera);
 
