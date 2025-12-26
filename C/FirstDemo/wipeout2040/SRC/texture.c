@@ -42,7 +42,6 @@ void LoadObjectCMP(char *filename)
 
     numtextures = GetLongLE(bytes, &b);
 
-    printf("%d textures are stored in %s\n", numtextures, filename);
 
     textureoffsets = (long*) malloc(numtextures * sizeof(long));
 
@@ -52,8 +51,6 @@ void LoadObjectCMP(char *filename)
 
         textureoffsets[i] = totaltexturesizes;
         timsize = GetLongLE(bytes, &b);
-
-        printf("Texture[%d] has a size of %d\n", i, timsize);
 
         totaltexturesizes += timsize;
     }

@@ -16,9 +16,20 @@ Object *ship;
 
 u_short shipindex = 0;
 
+Object *sceneobjs;
+Object *sceneobj;
+
+u_short objectcount;
+
+u_short angle;
+
+int holdingright = 0;
+int holdingleft = 0;
+
 void Setup(void)
 {
     u_short shipstarttexture;
+    u_short scenestarttexture;
 
     ScreenInit();
 
@@ -28,13 +39,22 @@ void Setup(void)
 
     ResetNextPrim(GetCurrBuff());
 
-    setVector(&camera.position, 0, -600, -900);
-    camera.lookat = (MATRIX){0};
-
     shipstarttexture = GetTextureCount();
     LoadObjectCMP("\\ALLSH.CMP;1");
+
+    scenestarttexture = GetTextureCount();
+    LoadObjectCMP("\\TRACK02\\SCENE.CMP;1");
+
     ships = LoadObjectPRM("\\ALLSH.PRM;1", shipstarttexture);
 
+    sceneobjs = LoadObjectPRM("\\TRACK02\\SCENE.PRM;1", scenestarttexture);
+
+    ship = GetObjectByIndex(ships, shipindex);
+
+    setVector(&ship->position, 32599, -347, -45310);
+
+    setVector(&camera.position, ship->position.vx, ship->position.vy - 100, ship->position.vz - 1000);
+    camera.lookat = (MATRIX){0};
 }
 
 void Update(void)
@@ -47,28 +67,27 @@ void Update(void)
 
     if (JoyPadCheck(PAD1_LEFT))
     {
-        if (shipindex > 0)
-        {
-            shipindex--;
-        }
+        camera.position.vx -= 100;
     }
 
     if (JoyPadCheck(PAD1_RIGHT))
     {
-        if (shipindex < 7)
-        {
-            shipindex++;
-        }
+        camera.position.vx += 100;
     }
 
-    ship = ships;
-
-    for (i = 0; i < shipindex; i++)
+    if (JoyPadCheck(PAD1_UP))
     {
-        ship = ship->next;
+        camera.position.vz += 100;
+    }
+
+    if (JoyPadCheck(PAD1_DOWN))
+    {
+        camera.position.vz -= 100;
     }
 
     LookAt(&camera, &camera.position, &ship->position, &(VECTOR){0, -ONE, 0});
+
+    RenderSceneObjects(sceneobjs, &camera);
 
     RenderObject(ship, &camera);
 }

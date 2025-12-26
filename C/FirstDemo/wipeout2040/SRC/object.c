@@ -7,6 +7,37 @@
 #include <stdlib.h>
 #include "inline_n.h"
 
+static u_short objectcount;
+
+u_short GetObjectCount(void)
+{
+        return objectcount;
+};
+
+Object *GetObjectByIndex(Object *list, u_short index)
+{
+    Object* currobj;
+    u_short i;
+
+    currobj = list;
+
+    i = 0;
+    while (currobj != NULL)
+    {
+        if (i >= index)
+        {
+            break;
+        }
+        else
+        {
+            currobj = currobj->next;
+            i++;
+        }
+    }
+
+    return currobj;
+};
+
 
 Object *LoadObjectPRM(char *filename, u_short starttexture)
 {
@@ -57,11 +88,10 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
             object->name[i] = GetChar(bytes, &b);
         }
 
-        printf("Loading &object: %s\n", object->name);
+        printf("Loading object: %s\n", object->name);
 
         object->numvertices = GetShortBE(bytes, &b);
         object->vertices = NULL;
-        printf("Loading: %s with %d normals\n", object->name, object->numvertices);
         b += 6;
 
 
@@ -69,12 +99,10 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
 
         object->numnormals = GetShortBE(bytes, &b);
         object->normals = NULL;
-        printf("Loading: %s with %d normals\n", object->name, object->numnormals);
 
         b += 6;
 
         object->numprimitives = GetShortBE(bytes, &b);
-        printf("Loading: %s with %d primitives\n", object->name, object->numprimitives);
 
         b += 22;
 
@@ -85,7 +113,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
         object->origin.vx = GetLongBE(bytes, &b);
         object->origin.vy = GetLongBE(bytes, &b);
         object->origin.vz = GetLongBE(bytes, &b);
-        printf("Object origin x: %d, y: %d, z: %d\n", object->origin.vx, object->origin.vy, object->origin.vz);
 
         b += 48;
 
@@ -97,10 +124,7 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
             object->vertices[i].vy = (GetShortBE(bytes, &b));
             object->vertices[i].vz = (GetShortBE(bytes, &b));
             b += 2;
-            printf("Loading vertex %d, with x: %d, y: %d, z: %d\n", i, object->vertices[i].vx, object->vertices[i].vy, object->vertices[i].vz);
         }
-
-        printf("Loaded: %d vertices from %s\n", object->numvertices, object->name);
 
         object->normals = (SVECTOR*) malloc(object->numnormals * sizeof(SVECTOR));
 
@@ -110,9 +134,7 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
             object->normals[i].vy = GetShortBE(bytes, &b);
             object->normals[i].vz = GetShortBE(bytes, &b);
             b += 2;
-            printf("Loading normals %d, with x: %d, y: %d, z: %d\n", i, object->normals[i].vx, object->normals[i].vy, object->normals[i].vz);
         }
-        printf("Loaded: %d normals from %s\n", object->numnormals, object->name);
 
           object->primitives = (PrimitiveNode*) malloc(object->numprimitives * sizeof(PrimitiveNode));
           for (i = 0; i < object->numprimitives; i++) {
@@ -121,7 +143,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
             switch (object->primitives[i].type) {
               case TypeF3: {
                 F3 *prm;
-                printf("Loading primitive type F3 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(F3));
                 prm            = (F3*) object->primitives[i].primitive;
                 prm->type      = TypeF3;
@@ -134,7 +155,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeFT3: {
                 FT3 *prm;
-                printf("Loading primitive type FT3 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(FT3));
                 prm            = (FT3*) object->primitives[i].primitive;
                 prm->type      = TypeFT3;
@@ -173,7 +193,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeF4: {
                 F4 *prm;
-                printf("Loading primitive type F4 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(F4));
                 prm            = (F4*) object->primitives[i].primitive;
                 prm->type      = TypeF4;
@@ -186,7 +205,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeFT4: {
                 FT4 *prm;
-                printf("Loading primitive type FT4 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(FT4));
                 prm            = (FT4*) object->primitives[i].primitive;
                 prm->type      = TypeFT4;
@@ -229,7 +247,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeG3: {
                 G3 *prm;
-                printf("Loading primitive type G3 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(G3));
                 prm            = (G3*) object->primitives[i].primitive;
                 prm->type      = TypeG3;
@@ -244,7 +261,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeGT3: {
                 GT3 *prm;
-                printf("Loading primitive type GT3 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(GT3));
                 prm            = (GT3*) object->primitives[i].primitive;
                 prm->type      = TypeGT3;
@@ -286,7 +302,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeG4: {
                 G4 *prm;
-                printf("Loading primitive type G4 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(G4));
                 prm            = (G4*) object->primitives[i].primitive;
                 prm->type      = TypeG4;
@@ -302,7 +317,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               }
               case TypeGT4: {
                 GT4 *prm;
-                printf("Loading primitive type GT4 \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(GT4));
                 prm            = (GT4*) object->primitives[i].primitive;
                 prm->type      = TypeGT4;
@@ -352,7 +366,6 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
               case TypeTSPR:
               case TypeBSPR: {
                 SPR *prm;
-                printf("Loading primitive type SPR \n");
                 object->primitives[i].primitive = (Prm*) malloc(sizeof(SPR));
                 prm            = (SPR*) object->primitives[i].primitive;
                 prm->type      = TypeTSPR;
@@ -364,62 +377,50 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
                 break;
               }
               case TypeSpline: {
-                printf("Loading primitive type Spline \n");
                 b += 52; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypePointLight: {
-                printf("Loading primitive type PointLight\n");
                 b += 24; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeSpotLight: {
-                printf("Loading primitive type SpotLight\n");
                 b += 36; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeInfiniteLight: {
-                printf("Loading primitive type InfiniteLight\n");
                 b += 12; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSF3: {
-                printf("Loading primitive type LSF3\n");
                 b += 12; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSFT3: {
-                printf("Loading primitive type LSFT3\n");
                 b += 24; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSF4: {
-                printf("Loading primitive type LSF4\n");
                 b += 16; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSFT4: {
-                printf("Loading primitive type LSFT4\n");
                 b += 28; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSG3: {
-                printf("Loading primitive type LSG3\n");
                 b += 24; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSGT3: {
-                printf("Loading primitive type LSGT3\n");
                 b += 36; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSG4: {
-                printf("Loading primitive type LSG4\n");
                 b += 32; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
               case TypeLSGT4: {
-                printf("Loading primitive type LSGT4\n");
                 b += 42; // --> skip this amount of bytes to bypass this primitive type
                 break;
               }
@@ -429,6 +430,8 @@ Object *LoadObjectPRM(char *filename, u_short starttexture)
             object->position = (VECTOR){object->origin.vx, object->origin.vy, object->origin.vz};
             object->scale    = (VECTOR){ONE, ONE, ONE};
             object->rotation = (SVECTOR){0, 0, 0};
+
+            objectcount++;
     }
 
     return firstobj;
@@ -703,4 +706,30 @@ void RenderObject(Object *object, Camera *camera) {
       }
     }
   }
+}
+
+void RenderSceneObjects(Object *list, Camera *camera)
+{
+    Object *currobj;
+    VECTOR d;
+    u_long sqmagnitude;
+
+    currobj = list;
+
+    while (currobj != NULL)
+    {
+        d.vx = currobj->position.vx - camera->position.vx;
+        d.vy = currobj->position.vy - camera->position.vy;
+        d.vz = currobj->position.vz - camera->position.vz;
+
+
+        sqmagnitude = (d.vx * d.vx) + (d.vy * d.vy) + (d.vz * d.vz);
+
+        if (sqmagnitude < 10000000000)
+        {
+            RenderObject(currobj, camera);
+        }
+
+        currobj = currobj->next;
+    }
 }

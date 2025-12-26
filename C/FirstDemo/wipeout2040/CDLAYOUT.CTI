@@ -51,6 +51,18 @@ Disc CDROMXA_PSX
 						Source [GameDir]\ASSETS\COMMON\ALLSH.CMP
 					EndFile
 
+                    Directory TRACK02
+                        File SCENE.CMP
+                            XAFileAttributes Form1 Data
+                            Source [GameDir]\ASSETS\TRACK02\SCENE.CMP
+                        EndFile
+
+                        File SCENE.PRM
+                            XAFileAttributes Form1 Data
+                            Source [GameDir]\ASSETS\TRACK02\SCENE.PRM
+                        EndFile
+                    EndDirectory
+
 
 				EndHierarchy
 			EndPrimaryVolume

@@ -5,7 +5,7 @@
 		<Cursor position="0" topLine="0" />
 	</File>
 	<File name="CDLAYOUT.CTI" open="1" top="0" tabpos="2">
-		<Cursor position="1250" topLine="20" />
+		<Cursor position="872" topLine="21" />
 	</File>
 	<File name="SRC\display.c" open="0" top="0" tabpos="9">
 		<Cursor position="531" topLine="7" />
@@ -25,17 +25,17 @@
 	<File name="SRC\lzss.h" open="1" top="0" tabpos="7">
 		<Cursor position="353" topLine="0" />
 	</File>
-	<File name="SRC\main.c" open="1" top="0" tabpos="1">
-		<Cursor position="343" topLine="0" />
+	<File name="SRC\main.c" open="1" top="1" tabpos="1">
+		<Cursor position="526" topLine="24" />
 	</File>
-	<File name="SRC\object.c" open="1" top="1" tabpos="4">
-		<Cursor position="8278" topLine="206" />
+	<File name="SRC\object.c" open="1" top="0" tabpos="4">
+		<Cursor position="26438" topLine="687" />
 	</File>
 	<File name="SRC\object.h" open="1" top="0" tabpos="3">
-		<Cursor position="595" topLine="0" />
+		<Cursor position="10474" topLine="330" />
 	</File>
 	<File name="SRC\texture.c" open="1" top="0" tabpos="6">
-		<Cursor position="2162" topLine="145" />
+		<Cursor position="16" topLine="0" />
 	</File>
 	<File name="SRC\texture.h" open="1" top="0" tabpos="5">
 		<Cursor position="538" topLine="0" />
