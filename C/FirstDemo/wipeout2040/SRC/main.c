@@ -62,8 +62,9 @@ void Setup(void)
 
     setVector(&ship->position, 32599, -347, -45310);
 
-    setVector(&camera.position, ship->position.vx, ship->position.vy - 100, ship->position.vz - 1000);
+    setVector(&camera.position, ship->position.vx, ship->position.vy - 200, ship->position.vz - 800);
     camera.lookat = (MATRIX){0};
+    camera.rotmat = (MATRIX){0};
 }
 
 void Update(void)
@@ -76,26 +77,29 @@ void Update(void)
 
     if (JoyPadCheck(PAD1_LEFT))
     {
-        camera.position.vx -= 100;
+        camera.position.vx -= 10;
     }
 
     if (JoyPadCheck(PAD1_RIGHT))
     {
-        camera.position.vx += 100;
+        camera.position.vx += 10;
     }
 
     if (JoyPadCheck(PAD1_UP))
     {
         camera.position.vz += 100;
+        ship->position.vz += 100;
     }
 
     if (JoyPadCheck(PAD1_DOWN))
     {
         camera.position.vz -= 100;
+        ship->position.vz -= 100;
     }
 
     LookAt(&camera, &camera.position, &ship->position, &(VECTOR){0, -ONE, 0});
 
+    RenderTrack(&track, &camera);
     RenderObject(ship, &camera);
 }
 

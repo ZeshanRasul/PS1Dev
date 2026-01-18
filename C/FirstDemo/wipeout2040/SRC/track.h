@@ -2,6 +2,7 @@
 #define TRACK_H
 
 #include "globals.h"
+#include "camera.h"
 #include <stddef.h>
 
 #define FACE_TRACK_BASE         1
@@ -53,5 +54,7 @@ typedef struct Track {
 void LoadTrackVertices(Track *track, char *filename);
 void LoadTrackFaces(Track *track, char *filename);
 void LoadTrackSections(Track *track, char *filename);
+
+void RenderTrack(Track *track, Camera *camera);
 
 #endif

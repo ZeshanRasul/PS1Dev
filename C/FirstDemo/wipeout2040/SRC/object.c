@@ -445,12 +445,11 @@ void RenderObject(Object *object, Camera *camera) {
   MATRIX worldmat;
   MATRIX viewmat;
 
-
   RotMatrix(&object->rotation, &worldmat);
   TransMatrix(&worldmat, &object->position);
   ScaleMatrix(&worldmat, &object->scale);
 
-  CompMatrixLV(&camera->lookat, &worldmat, &viewmat); // combine word and lookat transform
+  CompMatrixLV(&camera->lookat, &worldmat, &viewmat); // combine world and lookat transform
 
   SetRotMatrix(&viewmat);
   SetTransMatrix(&viewmat);

@@ -16,7 +16,7 @@ typedef struct {
 #define SCREEN_RES_Y 240
 #define SCREEN_CENTER_X (SCREEN_RES_X >> 1)
 #define SCREEN_CENTER_Y (SCREEN_RES_Y >> 1)
-#define SCREEN_Z 400
+#define SCREEN_Z 160
 
 u_short GetCurrBuff(void);
 
