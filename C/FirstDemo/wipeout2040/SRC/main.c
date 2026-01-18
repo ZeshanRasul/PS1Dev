@@ -7,9 +7,12 @@
 #include "utils.h"
 #include "object.h"
 #include "texture.h"
+#include "track.h"
 #include <stdlib.h>
 
 Camera camera;
+
+Track track;
 
 Object *ships;
 Object *ship;
@@ -47,7 +50,13 @@ void Setup(void)
 
     ships = LoadObjectPRM("\\ALLSH.PRM;1", shipstarttexture);
 
-    sceneobjs = LoadObjectPRM("\\TRACK02\\SCENE.PRM;1", scenestarttexture);
+    LoadTrackVertices(&track, "\\TRACK02\\TRACK.TRV;1");
+    LoadTrackFaces(&track, "\\TRACK02\\TRACK.TRF;1");
+    LoadTrackSections(&track, "\\TRACK02\\TRACK.TRS;1");
+
+    printf("NUM TRACK VERTICES: %d\n", track.numvertices);
+    printf("NUM TRACK FACES: %d\n", track.numfaces);
+    printf("NUM TRACK SECTIONS: %d\n", track.numsections);
 
     ship = GetObjectByIndex(ships, shipindex);
 
@@ -86,8 +95,6 @@ void Update(void)
     }
 
     LookAt(&camera, &camera.position, &ship->position, &(VECTOR){0, -ONE, 0});
-
-    RenderSceneObjects(sceneobjs, &camera);
 
     RenderObject(ship, &camera);
 }

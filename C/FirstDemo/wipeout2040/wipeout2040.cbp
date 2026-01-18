@@ -66,6 +66,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="SRC\texture.h" />
+		<Unit filename="SRC\track.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="SRC\track.h" />
 		<Unit filename="SRC\utils.c">
 			<Option compilerVar="CC" />
 		</Unit>
